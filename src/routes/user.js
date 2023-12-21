@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const getConnection = require('../database.js')
+const sprintf = require("locutus/php/strings/sprintf")
 
 /**
  * @swagger
@@ -169,6 +170,137 @@ router.get('/user-group/:groupname', (req, res) => {
 
         const users = rows.map((row) => {
             return { id: row.id, firstname: row.firstname, lastname: row.lastname, groupname: row.groupname, username: row.username, password: row.value }
+        })
+
+        res.json(users)
+    })
+})
+
+/**
+ * @swagger
+ * /enable-user/{username}:
+ *   get:
+ *     tags:
+ *     - USERS
+ *     summary: Enable user based on USERNAME
+ *     description: Enable user based on USERNAME
+ *     produces:
+ *     - application/json
+ *     parameters:
+ *     - name: username
+ *       in: path
+ *       description: Enter the USERNAME of the desired user
+ *       required: true
+ *       type: string
+ *     responses:
+ *       200:
+ *         description: Ok
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get('/enable-user/:username', (req, res) => {
+
+    const userName = req.params.username
+    const disabled_groupname = 'daloRADIUS-Disabled-Users'
+    const queryString = sprintf("DELETE FROM radusergroup WHERE username = '%s' AND groupname='%s'", userName, disabled_groupname)
+    getConnection.query(queryString, [userName], (err, rows, fields) => {
+        if (err) {
+            console.log("Failed to query for: " + err)
+            res.sendStatus(500)
+            return
+            // throw err
+        }
+
+        console.log("Successfully enabled user")
+
+        res.send('Successfully enabled user with Username ' + req.params.username)
+    })
+
+})
+
+/**
+ * @swagger
+ * /disable-user/{username}:
+ *   get:
+ *     tags:
+ *     - USERS
+ *     summary: Disable user based on USERNAME
+ *     description: Disable user based on USERNAME
+ *     produces:
+ *     - application/json
+ *     parameters:
+ *     - name: username
+ *       in: path
+ *       description: Enter the USERNAME of the desired user
+ *       required: true
+ *       type: string
+ *     responses:
+ *       200:
+ *         description: Ok
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get('/disable-user/:username', (req, res) => {
+
+    const userName = req.params.username
+    const disabled_groupname = 'daloRADIUS-Disabled-Users'
+    const queryString = sprintf("SELECT COUNT(*) AS is_online FROM radusergroup WHERE username = '%s' AND groupname='%s'", userName, disabled_groupname);
+    getConnection.query(queryString, (err, row) => {
+        if (err) {
+            console.log("Failed to query for: " + err)
+            return res.sendStatus(500)
+        } else if (row[0].is_online > 0) {
+            return res.send('User with Username: ' + userName + ' is already disabled!')
+        }
+
+        const query = `
+    SET @username = ?;
+    SET @groupname = ?;
+    SET @priority = ?;
+    CALL userDisable(@username, @groupname, @priority);
+    `
+        getConnection.query(query, [userName, disabled_groupname, 0], (err) => {
+            if (!err) {
+                return res.send('User has been disabled successfully!')
+            } else {
+                console.log(err);
+                return res.sendStatus(500)
+            }
+        })
+    })
+
+})
+
+/**
+ * @swagger
+ * /get-online-users/:
+ *   get:
+ *     tags:
+ *     - USERS
+ *     summary: Show all online users
+ *     description: It will show all online users on the router
+ *     produces:
+ *     - application/json
+ *     responses:
+ *       200:
+ *         description: Ok
+ *       500:
+ *         description: Internal Server Error
+ */
+router.get('/get-online-users/', (req, res) => {
+
+    const queryString = "SELECT DISTINCT(username) FROM radacct WHERE AcctStopTime IS NULL OR AcctStopTime='0000-00-00 00:00:00' ORDER BY username ASC"
+    getConnection.query(queryString, (err, rows, fields) => {
+        if (err) {
+            console.log("Failed to query for: " + err)
+            res.sendStatus(500)
+            return
+        }
+
+        console.log("Successfully loaded online users")
+
+        const users = rows.map((row) => {
+            return { id: row.id, acctsessionid: row.acctsessionid, nasipaddress: row.nasipaddress, groupname: row.groupname, username: row.username, acctstarttime: row.acctstarttime, acctsessiontime: row.acctsessiontime }
         })
 
         res.json(users)

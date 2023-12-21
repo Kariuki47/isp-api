@@ -369,25 +369,38 @@ router.post('/nas-create/', (req, res) => {
  */
 router.post('/nas-disconnect-request/', (req, res) => {
     const { username, server, port, secret } = req.body
-    const query = sprintf("User-Name=%s", escapeshellarg(username))
-    const radclient_path = '/usr/bin/radclient'
-    const radclient_options = sprintf(" -c %s -n %s -r %s -t %s %s", escapeshellarg('1'), escapeshellarg('3'), escapeshellarg('3'), escapeshellarg('3'), '-x')
-    const server_port = sprintf("%s:%d", server, port);
-    const positional_args = sprintf("%s %s %s", server_port, escapeshellarg('disconnect'), escapeshellarg(secret));
-    const args = sprintf('echo "%s" | %s %s %s 2>&1', query, radclient_path, radclient_options, positional_args)
-    console.log(args)
-    //var escaped = shellescape(args);
-    //console.log(escaped);
-    // run the `ls` command using exec
-    exec(args, (err, output) => {
-        // once the command has completed, the callback function is called
+    const queryString = sprintf("SELECT COUNT(*) AS is_online FROM radacct WHERE username = '%s' AND (AcctStopTime IS NULL OR AcctStopTime='0000-00-00 00:00:00')", username)
+    getConnection.query(queryString, (err, row) => {
         if (err) {
-            // log and return if we encounter an error
-            console.error("could not execute command: ", err)
+            console.log("Failed to query for: " + err)
+            res.sendStatus(500)
+            return
+        } else if (row[0].is_online <= 0) {
+            res.send('No user found online with Username: ' + username)
             return
         }
-        // log the output received from the command
-        console.log("Output: \n", output)
+
+        const query = sprintf("User-Name=%s", escapeshellarg(username))
+        const radclient_path = '/usr/bin/radclient'
+        const radclient_options = sprintf(" -c %s -n %s -r %s -t %s %s", escapeshellarg('1'), escapeshellarg('3'), escapeshellarg('3'), escapeshellarg('3'), '-x')
+        const server_port = sprintf("%s:%d", server, port);
+        const positional_args = sprintf("%s %s %s", server_port, escapeshellarg('disconnect'), escapeshellarg(secret));
+        const args = sprintf('echo "%s" | %s %s %s 2>&1', query, radclient_path, radclient_options, positional_args)
+        console.log(args)
+        // run the `ls` command using exec
+        exec(args, (err, output) => {
+            // once the command has completed, the callback function is called
+            if (err) {
+                // log and return if we encounter an error
+                console.error("could not execute command: ", err)
+                res.sendStatus(500)
+                return
+            }
+            // log the output received from the command
+            console.log("Output: \n", output)
+            const successMsg = sprintf('Performed disconnect action on user <strong>%s</strong><pre class="font-monospace my-1">%s</pre>', username, output);
+            res.send(successMsg)
+        })
     })
 })
 
