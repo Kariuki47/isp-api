@@ -373,3 +373,10 @@
 ::1 - POST /confirmation HTTP/1.1 200 40 - 47.458 ms
 ::1 - POST /confirmation HTTP/1.1 200 40 - 21.306 ms
 ::1 - POST /confirmation HTTP/1.1 200 40 - 13.464 ms
+::1 - GET /api-docs/ HTTP/1.1 304 - - 5.796 ms
+::1 - GET /api-docs/swagger-ui-init.js HTTP/1.1 200 23903 - 0.753 ms
+::1 - GET /api-docs/swagger-ui-bundle.js HTTP/1.1 200 1398526 - 5.939 ms
+::1 - GET /api-docs/swagger-ui.css HTTP/1.1 200 152082 - 44.826 ms
+::1 - GET /api-docs/swagger-ui-standalone-preset.js HTTP/1.1 200 230640 - 98.354 ms
+::1 - GET /api-docs/favicon-32x32.png HTTP/1.1 200 628 - 6.836 ms
+::1 - POST /stkPushCallback HTTP/1.1 200 40 - 14.452 ms

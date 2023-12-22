@@ -13,6 +13,10 @@ const express = require('express'),
 
 const getConnection = require('../database.js')
 
+const {
+    stkPushCallback
+} = require("../controllers/controllers.lipanampesa.js");
+
 const prettyJsonOptions = {
     noColor: true
 };
@@ -98,7 +102,7 @@ router.get('/access_token', access, (req, res) => {
  *         description: Internal Server Error
  */
 router.get('/register', access, (req, resp) => {
-    let url = "https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl"
+    let url = "https://sandbox.safaricom.co.ke/mpesa/c2b/v2/registerurl"
     let auth = "Bearer " + req.access_token
 
     request(
@@ -110,7 +114,7 @@ router.get('/register', access, (req, resp) => {
             },
             json: {
                 "ShortCode": shortcode,
-                "ResponseType": "Complete",
+                "ResponseType": "Completed",
                 "ConfirmationURL": confirmation_url,
                 "ValidationURL": validation_url
             }
@@ -307,24 +311,13 @@ router.post('/confirmation', function (req, res) {
             };
             res.json(message);
         } else {
+            res.status(500).send(err);
             console.log(err);
         }
     })
 
-    /*req.body.TransactionType
-    req.body.TransID
-    req.body.TransTime
-    req.body.TransAmount
-    req.body.BusinessShortCode
-    req.body.BillRefNumber
-    req.body.InvoiceNumber
-    req.body.OrgAccountBalance
-    req.body.ThirdPartyTransID
-    req.body.MSISDN
-    req.body.FirstName
-    req.body.MiddleName
-    req.body.LastName */   
-
 });
+
+router.route('/stkPushCallback').post(stkPushCallback)
 
 module.exports = router
