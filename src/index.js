@@ -4,6 +4,7 @@ const morgan = require('morgan')
 const fs = require('fs')
 const path = require('path')
 const swaggerDoc = require('./swaggerDoc')
+const bodyParser = require('body-parser')
 
 // Logging
 const accessLogStream = fs.createWriteStream(path.join('./src/log', 'access.log'), { flags: 'a' })
@@ -15,6 +16,7 @@ app.set('port', process.env.PORT || 3000)
 
 // Middlewares
 app.use(express.json())
+//app.use(bodyParser.json())
 swaggerDoc(app)
 
 //CORS Middleware
@@ -29,9 +31,11 @@ app.use(function (req, res, next) {
 // Routes
 const UserRouter = require('./routes/user')
 const NasRouter = require('./routes/nas')
+const MpesaRouter = require('./routes/mpesa')
 
 app.use(UserRouter)
 app.use(NasRouter)
+app.use(MpesaRouter)
 
 // Starting the server
 app.listen(app.get('port'), () => {

@@ -27,6 +27,10 @@ const options = {
                 "name": "NAS",
                 "description": "Informations about NAS Route"
             },
+            {
+                "name": "MPESA",
+                "description": "Informations about MPESA Route"
+            },
         ],
         "schemes": [
             "http"
@@ -116,6 +120,94 @@ const options = {
                 },
                 "xml": {
                     "name": "Nas-PoD"
+                },
+            },
+             "Mpesa": {
+                "type": "object",
+                "properties": {
+                    "TransactionType": {
+                        "type": "string"
+                    },
+                    "TransID": {
+                        "type": "string"
+                    },
+                    "TransTime": {
+                        "type": "string"
+                    },
+                    "TransAmount": {
+                        "type": "string"
+                    },
+                    "BusinessShortCode": {
+                        "type": "string"
+                    },
+                    "BillRefNumber": {
+                        "type": "string"
+                    },
+                    "InvoiceNumber": {
+                        "type": "string"
+                    },
+                    "OrgAccountBalance": {
+                        "type": "string"
+                    },
+                    "ThirdPartyTransID": {
+                        "type": "string"
+                    },
+                    "MSISDN": {
+                        "type": "string"
+                    },
+                    "FirstName": {
+                        "type": "string"
+                    },
+                    "MiddleName": {
+                        "type": "string"
+                    },
+                    "LastName": {
+                        "type": "string"
+                    }
+                },
+                "xml": {
+                    "name": "Mpesa"
+                },
+            },
+            "Mpesa-Request": {
+                "type": "object",
+                "properties": {
+                    "OriginatorConversationID": {
+                        "type": "string"
+                    },
+                    "InitiatorName": {
+                        "type": "string"
+                    },
+                    "SecurityCredential": {
+                        "type": "string"
+                    },
+                    "CommandID": {
+                        "type": "string"
+                    },
+                    "Amount": {
+                        "type": "number"
+                    },
+                    "PartyA": {
+                        "type": "string"
+                    },
+                    "PartyB": {
+                        "type": "string"
+                    },
+                    "Remarks": {
+                        "type": "string"
+                    },
+                    "QueueTimeOutURL": {
+                        "type": "string"
+                    },
+                    "ResultURL": {
+                        "type": "string"
+                    },
+                    "Occassion": {
+                        "type": "string"
+                    }
+                },
+                "xml": {
+                    "name": "Mpesa-Request"
                 },
             },
         }
